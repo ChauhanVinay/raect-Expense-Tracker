@@ -26,7 +26,7 @@ const SignUp = () => {
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      console.log("User has successfully signed up.");
+  console.log("User has successfully signed up.");
     } catch (err) {
       setError(err.message);
     }
