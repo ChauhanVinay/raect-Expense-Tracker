@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
 import Welcome from './components/Welcome';
 import SignUp from './components/SignUp';
-import UpdateProfile from './components/NewProfile'; 
+import UpdateProfile from './components/UpdateProfile'; 
 
 function App() {
  
@@ -22,4 +22,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
