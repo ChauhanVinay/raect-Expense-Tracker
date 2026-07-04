@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Welcome from './components/Welcome';
 import SignUp from './components/SignUp';
 import UpdateProfile from './components/UpdateProfile'; 
+import ForgotPassword from './components/ForgotPassword';
 
 function App() {
  
@@ -15,6 +16,7 @@ function App() {
    <Route path="/login" element={<Login />} />
    <Route path="/welcome" element={<Welcome />} />
     <Route path="/update-profile" element={<UpdateProfile />} />
+    <Route path="/forgot-password" element={<ForgotPassword />} />
    {/* Redirect default path to Login */}
    <Route path="/" element={<Login />} />
       </Routes>

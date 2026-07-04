@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from './firebase'; 
 import './Login.css';
+import { Link } from 'react-router-dom';
 
 
 const Login = () => {
@@ -34,7 +35,10 @@ const  handleLogin = async (e) => {
         <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
         
         <button type="submit">Login</button>
-        <span className="forgot-link">Forgot password</span>
+        
+       <Link to="/forgot-password" className="forgot-link" style={{ display: 'block', margin: '15px 0' }}>
+  Forgot password?
+</Link>
         
         <div className="signup-link">
           Don't have an account? <a href="/signup">Sign up</a>
