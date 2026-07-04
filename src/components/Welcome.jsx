@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom';
-import { auth } from './firebase'; // 2. Import auth from your firebase.js file
+import { auth } from './firebase';
 
 const API_KEY = "AIzaSyCONfqWrXYm2ZF4goNOeAzquBy-lidEx8U"; 
 
@@ -19,6 +19,16 @@ const Welcome = () => {
     
     return () => unsubscribe(); // Cleanup listener
   }, []);
+
+  //Logout function
+  const handleLogout = () => {
+    //Clear the token from local storage
+    localStorage.removeItem("token");
+    auth.signOut();
+
+    //Redirect to login page
+    navigate('/login');
+  }
 
   const handleVerifyEmail = async () => {
     setMessage('');
@@ -66,6 +76,27 @@ const Welcome = () => {
   };
 
   return (
+    <div style={{ fontFamily: 'Arial, sans-serif' }}>
+      
+      <header style={{ display: 'flex', justifyContent: 'flex-end', padding: '15px 30px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #ddd' }}>
+        <button 
+          onClick={handleLogout}
+          style={{ 
+            padding: '8px 16px', 
+            backgroundColor: '#dc3545', // Red color for logout
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}
+        >
+          Logout
+        </button>
+      </header>
+
+
     <div style={{ textAlign: 'center', marginTop: '50px', fontFamily: 'Arial, sans-serif' }}>
       <h1>Welcome to Expense Tracker</h1>
       
@@ -106,6 +137,7 @@ const Welcome = () => {
 
       {message && <p style={{ color: 'green', fontWeight: 'bold' }}>{message}</p>}
       {error && <p style={{ color: 'red', fontWeight: 'bold' }}>{error}</p>}
+    </div>
     </div>
   );
 };
