@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import { auth } from './firebase';
+import ExpenseForm from './ExpenseForm';
 
 const API_KEY = "AIzaSyCONfqWrXYm2ZF4goNOeAzquBy-lidEx8U"; 
 
@@ -138,6 +139,7 @@ const Welcome = () => {
       {message && <p style={{ color: 'green', fontWeight: 'bold' }}>{message}</p>}
       {error && <p style={{ color: 'red', fontWeight: 'bold' }}>{error}</p>}
     </div>
+    <ExpenseForm />
     </div>
   );
 };
