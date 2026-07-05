@@ -1,39 +1,99 @@
-import { useState } from "react";
+import React, { useState, useEffect } from 'react';
 
+// Your specific Firebase Database URL + /expenses.json
+const FIREBASE_DB_URL = "https://react-form-24af0-default-rtdb.firebaseio.com/expenses.json";
 
 const ExpenseForm = () => {
-    const [amount, setAmount] = useState('');
-    const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('');
-    //state to store the list of expenses
-    const [expenses, setExpenses] = useState([]);
+  const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
+  const [expenses, setExpenses] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-   const handleAddExpense = (e) => {
-        e.preventDefault();
+  // Deliverable 2: GET request on page load to fetch existing expenses
+  useEffect(() => {
+    fetchExpenses();
+  }, []);
 
-        // Create a new expense object
-        const newExpense = {
-            id: Math.random().toString(),
-            amount: amount,
-            description: description,
-            category: category,
-        };
-        // Add the new expense to the list
-        setExpenses([...expenses, newExpense]);
+  const fetchExpenses = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(FIREBASE_DB_URL);
+      if (!response.ok) {
+        throw new Error('Failed to fetch expenses.');
+      }
+      
+      const data = await response.json();
+      
+      // Firebase returns an object with unique keys, we need to convert it to an array
+      const loadedExpenses = [];
+      for (const key in data) {
+        loadedExpenses.push({
+          id: key,
+          amount: data[key].amount,
+          description: data[key].description,
+          category: data[key].category,
+        });
+      }
+      
+      setExpenses(loadedExpenses);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        // Clear the form fields
-        setAmount('');
-        setDescription('');
-        setCategory('');
-   };
+  // Deliverable 1: POST request to save a new expense
+  const handleAddExpense = async (e) => {
+    e.preventDefault();
+    setError(null);
 
-    return (
+    const newExpense = {
+      amount: amount,
+      description: description,
+      category: category,
+    };
+
+    try {
+      const response = await fetch(FIREBASE_DB_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newExpense),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add expense.');
+      }
+
+      const data = await response.json();
+
+      // Show it on the screen once we get a success (adding the Firebase-generated ID)
+      setExpenses((prevExpenses) => [
+        ...prevExpenses,
+        { id: data.name, ...newExpense }
+      ]);
+
+      // Clear the form
+      setAmount('');
+      setDescription('');
+      setCategory('');
+      
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
     <div style={{ maxWidth: '500px', margin: '40px auto', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#fff' }}>
       <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Add Daily Expense</h2>
       
-      {/* Form */}
+      {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+
       <form onSubmit={handleAddExpense} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        
         <div>
           <label style={{ fontWeight: 'bold' }}>Money Spent (₹):</label>
           <input 
@@ -80,11 +140,13 @@ const ExpenseForm = () => {
         </button>
       </form>
 
-      {/* Display the expenses */}
       <div style={{ marginTop: '40px' }}>
         <h3 style={{ borderBottom: '2px solid #eee', paddingBottom: '10px' }}>Your Expenses</h3>
-        {expenses.length === 0 ? (
-          <p style={{ color: '#777', textAlign: 'center' }}>No expenses added yet.</p>
+        
+        {isLoading && <p style={{ textAlign: 'center', color: '#007bff' }}>Loading expenses...</p>}
+        
+        {!isLoading && expenses.length === 0 ? (
+          <p style={{ color: '#777', textAlign: 'center' }}>No expenses found.</p>
         ) : (
           <ul style={{ listStyleType: 'none', padding: 0 }}>
             {expenses.map((expense) => (
@@ -103,5 +165,6 @@ const ExpenseForm = () => {
       </div>
     </div>
   );
-}
+};
+
 export default ExpenseForm;
