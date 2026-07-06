@@ -3,12 +3,14 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from './firebase'; 
 import './Login.css';
 import { Link } from 'react-router-dom';
-
+import { useDispatch } from 'react-redux';
+import { authActions } from '../store/authSlice';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const dispatch = useDispatch();
 
 const  handleLogin = async (e) => {
     e.preventDefault();
@@ -18,8 +20,12 @@ const  handleLogin = async (e) => {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         //store the token
         const token = await userCredential.user.getIdToken();
-        localStorage.setItem('token', token);
-        window.location.href = "/welcome"; // Redirect to the welcome page
+        dispatch(authActions.login({
+          token: token,
+          userId: userCredential.user.uid
+        }));
+
+        window.location.href = "/welcome";
     } catch (err) {
         alert("login failed: " + err.message);
         setError(err.message);

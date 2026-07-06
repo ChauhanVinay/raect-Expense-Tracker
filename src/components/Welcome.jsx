@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from './firebase';
 import ExpenseForm from './ExpenseForm';
+import {  useDispatch } from 'react-redux';
+import { authActions } from "../store/authSlice";
 
 const API_KEY = "AIzaSyCONfqWrXYm2ZF4goNOeAzquBy-lidEx8U"; 
 
@@ -9,6 +11,7 @@ const Welcome = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     // This listens for the user to load, then logs their verification status
@@ -24,9 +27,8 @@ const Welcome = () => {
   //Logout function
   const handleLogout = () => {
     //Clear the token from local storage
-    localStorage.removeItem("token");
+    dispatch(authActions.logout());
     auth.signOut();
-
     //Redirect to login page
     navigate('/login');
   }
@@ -36,7 +38,6 @@ const Welcome = () => {
     setError('');
     
     const token = localStorage.getItem("token");
-
     if (!token) {
       setError("User not authenticated. Please log in again.");
       return;
