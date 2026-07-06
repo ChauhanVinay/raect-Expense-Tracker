@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { expenseActions } from '../store/expenseSlice';
+import { themeActions } from '../store/themeSlice';
 
 const FIREBASE_DB_URL = "https://react-form-24af0-default-rtdb.firebaseio.com/expenses";
 
@@ -14,6 +15,8 @@ const ExpenseForm = () => {
 
   const dispatch = useDispatch();
   const expenses = useSelector((state) => state.expense.expenses); 
+
+  const { isPremium, isDarkTheme } = useSelector((state) => state.theme);
 
   const totalExpenses = expenses.reduce((total, item) => total + Number(item.amount), 0);
 
@@ -96,6 +99,28 @@ const ExpenseForm = () => {
     setEditId(expense.id);
   };
 
+  const downloadCSV = () => {
+    const csvHeader = ["Category", "Description", "Amount"];
+    const csvRows = expenses.map(exp => [exp.category, exp.description, exp.amount]);
+
+    const csvContent = [csvHeader, ...csvRows]
+    .map(row => row.join(","))
+    .join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "expenses.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const formBgColor = isDarkTheme ? '#333' : '#fff';
+  const itemBgColor = isDarkTheme ? '#444' : '#f9f9f9';
+  const textColor = isDarkTheme ? '#fff' : '#000';
+
   return (
     <div style={{ maxWidth: '600px', margin: '40px auto', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#fff' }}>
       
@@ -103,12 +128,31 @@ const ExpenseForm = () => {
       {totalExpenses > 10000 && (
         <div style={{ textAlign: 'center', marginBottom: '20px', padding: '15px', backgroundColor: '#fff3cd', borderRadius: '8px' }}>
           <h3 style={{ color: '#856404', margin: '0 0 10px 0' }}>Total Expenses: ₹{totalExpenses}</h3>
-          <button style={{ padding: '10px 20px', backgroundColor: '#ffc107', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>
+          <button 
+          onClick={() => dispatch(themeActions.activatePremium())}
+          style={{ padding: '10px 20px', backgroundColor: '#ffc107', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>
             Activate Premium
           </button>
         </div>
       )}
 
+   {/* 2. Show Premium Features (Theme Toggle & CSV) once activated */}
+      {isPremium && (
+        <div style={{ textAlign: 'center', marginBottom: '20px', padding: '15px', backgroundColor: isDarkTheme ? '#555' : '#e2e3e5', borderRadius: '8px', display: 'flex', justifyContent: 'center', gap: '15px' }}>
+          <button 
+            onClick={() => dispatch(themeActions.toggleTheme())} 
+            style={{ padding: '8px 15px', backgroundColor: '#343a40', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
+            {isDarkTheme ? '☀️ Light Mode' : '🌙 Dark Mode'}
+          </button>   
+
+          <button 
+            onClick={downloadCSV} 
+            style={{ padding: '8px 15px', backgroundColor: '#17a2b8', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
+            ⬇️ Download Expenses (CSV)
+          </button>
+        </div>
+     )}
+     
       <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>
         {editId ? 'Edit Expense' : 'Add Daily Expense'}
       </h2>
