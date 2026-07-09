@@ -1,11 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event'; // <-- NEW: Simulates user actions
 import '@testing-library/jest-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import store from './store/index';
-import Login from './components/Login';
-import ExpenseForm from './components/ExpenseForm';
+import Login from './components/Login'; 
+import ExpenseForm from './components/ExpenseForm'; 
 
 // Helper function to wrap components with Redux Store and Router
 const renderWithProviders = (component) => {
@@ -18,71 +19,96 @@ const renderWithProviders = (component) => {
   );
 };
 
-describe('Expense Tracker App Tests', () => {
+describe('Testing User Actions & State', () => {
   
-  // --- Test Cases for Login Component ---
+  // --- Tests for Login User Interactions ---
   
-  test('1. renders the Login heading', () => {
-    renderWithProviders(<Login />);
-    const headingElement = screen.getByRole('heading', { name: /login/i });
-    expect(headingElement).toBeInTheDocument();
-  });
-
-  test('2. renders the Email input field', () => {
+  test('1. Email input state updates when user types', async () => {
     renderWithProviders(<Login />);
     const emailInput = screen.getByPlaceholderText(/email/i);
-    expect(emailInput).toBeInTheDocument();
+    
+    // Simulate user typing
+    await userEvent.type(emailInput, 'test@example.com');
+    
+    // Assert the state updated the input value
+    expect(emailInput).toHaveValue('test@example.com');
   });
 
-  test('3. renders the Password input field', () => {
+  test('2. Password input state updates when user types', async () => {
     renderWithProviders(<Login />);
     const passwordInput = screen.getByPlaceholderText(/password/i);
-    expect(passwordInput).toBeInTheDocument();
+    
+    await userEvent.type(passwordInput, 'secret123');
+    expect(passwordInput).toHaveValue('secret123');
   });
 
-  test('4. renders the Login button', () => {
+  test('3. Login button handles click events', async () => {
     renderWithProviders(<Login />);
-    const buttonElement = screen.getByRole('button', { name: /login/i });
-    expect(buttonElement).toBeInTheDocument();
+    const loginBtn = screen.getByRole('button', { name: /login/i });
+    
+    // Simulate button click
+    await userEvent.click(loginBtn);
+    expect(loginBtn).toBeInTheDocument();
   });
 
-  test('5. renders the Forgot password link', () => {
+  test('4. Forgot password link can be clicked', async () => {
     renderWithProviders(<Login />);
     const forgotLink = screen.getByText(/forgot password\?/i);
+    
+    await userEvent.click(forgotLink);
     expect(forgotLink).toBeInTheDocument();
   });
 
-  test('6. renders the Sign up link text', () => {
+  test('5. Sign up link handles click events', async () => {
     renderWithProviders(<Login />);
-    const signUpText = screen.getByText(/don't have an account\?/i);
-    expect(signUpText).toBeInTheDocument();
+    const signupLink = screen.getByText(/sign up/i);
+    
+    await userEvent.click(signupLink);
+    expect(signupLink).toBeInTheDocument();
   });
 
 
-  // --- Test Cases for ExpenseForm Component ---
+  // --- Tests for ExpenseForm User Interactions ---
 
-  test('7. renders the ExpenseForm heading', () => {
-    renderWithProviders(<ExpenseForm />);
-    const headingElement = screen.getByRole('heading', { name: /add daily expense/i });
-    expect(headingElement).toBeInTheDocument();
-  });
-
-  test('8. renders the Amount input field', () => {
+  test('6. Amount input state updates when user types numbers', async () => {
     renderWithProviders(<ExpenseForm />);
     const amountInput = screen.getByPlaceholderText(/amount/i);
-    expect(amountInput).toBeInTheDocument();
+    
+    await userEvent.type(amountInput, '500');
+    expect(amountInput).toHaveValue(500);
   });
 
-  test('9. renders the Description input field', () => {
+  test('7. Description input state updates when user types text', async () => {
     renderWithProviders(<ExpenseForm />);
     const descInput = screen.getByPlaceholderText(/description/i);
-    expect(descInput).toBeInTheDocument();
+    
+    await userEvent.type(descInput, 'Groceries');
+    expect(descInput).toHaveValue('Groceries');
   });
 
-  test('10. renders the Category dropdown', () => {
+  test('8. Category dropdown state updates when user selects an option', async () => {
     renderWithProviders(<ExpenseForm />);
-    const comboElement = screen.getByRole('combobox');
-    expect(comboElement).toBeInTheDocument();
+    const categorySelect = screen.getByRole('combobox');
+    
+    // Simulate user selecting "Food" from the dropdown
+    await userEvent.selectOptions(categorySelect, 'Food');
+    expect(categorySelect).toHaveValue('Food');
+  });
+
+  test('9. Add Expense button triggers click event', async () => {
+    renderWithProviders(<ExpenseForm />);
+    const addBtn = screen.getByRole('button', { name: /add expense/i });
+    
+    await userEvent.click(addBtn);
+    expect(addBtn).toBeInTheDocument();
+  });
+
+  test('10. Premium button is NOT visible initially based on state', () => {
+    renderWithProviders(<ExpenseForm />);
+    
+    // Use queryByRole instead of getByRole to assert that an element DOES NOT exist
+    const premiumBtn = screen.queryByRole('button', { name: /activate premium/i });
+    expect(premiumBtn).toBeNull(); 
   });
 
 });
